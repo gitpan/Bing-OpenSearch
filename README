@@ -1,0 +1,36 @@
+Bing::OpenSearch version 0.0.1 - 05 February 2010
+
+Bing::OpenSearch provides access to the OpenSearch compliant RSS interface of the Bing API version 2.0.
+The RSS endpoint is anonymous; it doesn’t require an AppID.
+
+Please check out the Bing API Version 2.0 Terms of Use: http://www.bing.com/developers/tou.aspx
+
+INSTALLATION
+
+perl Makefile.PL
+make
+make test
+make install
+
+Notes for Windows:
+You will need nmake. You can download nmake from ftp://ftp.microsoft.com/Softlib/MSLFILES/nmake15.exe
+Run the downloaded executable to extract the files. Copy both the NMAKE.EXE and the NMAKE.ERR file
+to your Perl bin directory, normally C:\Perl\bin. Make sure that you copy the NMAKE.ERR file as well.
+Just replace make with nmake while following the steps above.
+
+DEPENDENCIES
+
+- LWP::UserAgent
+- XML::LibXML
+- Class::Std::Utils
+- version
+- Test::More
+- Test::Exception
+- Scalar::Util
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2010, Kostas Ntonas <kntonas@gmail.com>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.

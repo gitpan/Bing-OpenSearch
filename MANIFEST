@@ -1,0 +1,11 @@
+lib/Bing/OpenSearch.pm
+lib/Bing/OpenSearch/Result.pm
+lib/Bing/OpenSearch/Response.pm
+lib/Bing/OpenSearch/MediaContent.pm
+lib/Bing/OpenSearch/MediaThumbnail.pm
+Changes
+Makefile.PL
+MANIFEST
+README
+test.pl
+META.yml                                 Module meta-data (added by MakeMaker)
