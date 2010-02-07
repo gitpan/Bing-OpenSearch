@@ -7,10 +7,11 @@ use Carp qw( croak );
 
 use XML::LibXML;
 use Class::Std::Utils;
+use Encode;
 
 use Bing::OpenSearch::Result;
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 # We use inside-out objects.
 # See Chapters 15 and 16 of "Perl Best Practices" (O'Reilly, 2005) for details.
@@ -19,10 +20,11 @@ my %totalResults_of;
 my %queryURL_of;
 my %content_of;
 my %results_of;
+my %space_of;
 
 sub new
 {
-    my ($class, $xml, $url) = @_;
+    my ($class, $xml, $url, $space) = @_;
 
     my $response={};
     bless $response, $class;
@@ -58,6 +60,8 @@ sub new
         $totalResults_of{$id_num} = ${$doc->getElementsByTagName('os:totalResults')}[0]->textContent;
     }
 
+    $space_of{$id_num} = $space;
+
     my $itemList = $doc->getElementsByTagName('item'); # returns a XML::LibXML::NodeList object (SCALAR context)
     my @items;
     if ($itemList) {
@@ -84,6 +88,7 @@ sub DESTROY {
     delete $queryURL_of{$id_num};
     delete $content_of{$id_num};
     delete $results_of{$id_num};
+    delete $space_of{$id_num};
 }
 
 # get content
@@ -115,6 +120,23 @@ sub results {
     return $results_of{ident $self}; # scalar context - return reference to the array of results
 }
 
+# get search space from which the results derived
+sub space {
+    my $self = shift;
+    ref $self or croak "Instance variable needed.\n";
+    $space_of{ident $self};
+}
+
+# save the response RSS feed to a UTF-8 file
+sub save {
+    my ($self, $filename) = @_;
+    ref $self or croak "Instance variable needed.\n";
+
+    open my $fh, '>:utf8', $filename;
+    print $fh decode_utf8($self->content);
+    close $fh;
+}
+
 1;
 __END__
 
@@ -124,7 +146,7 @@ Bing::OpenSearch::Response - Container object for the result set of one query to
 
 =head1 VERSION
 
-Version 0.0.1
+Version 0.0.2
 
 =head1 PACKAGE USE
 
@@ -132,11 +154,11 @@ You don't need to C<use> this package directly.
 
 =head1 CONSTRUCTOR
 
-=head2 new( $xml, $url )
+=head2 new( $xml, $url, $space )
 
 Constructs a new instance of Bing::OpenSearch::Response using the RSS response feed
-content ($xml) and the query URL ($url) built for this particular query.
-You don't need to use this method.
+content ($xml), the query URL ($url) built for this particular query and the search
+space queried ($space). You don't need to use this method.
 
 =head1 METHODS
 
@@ -157,9 +179,17 @@ If called in a scalar context, it returns a reference to the array of results.
 
 Returns the number of hits found.
 
+=head2 space
+
+Returns the search space from which the results derived.
+
+=head2 save
+
+Save the response RSS feed to a UTF-8 file.
+
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2010, Kostas Ntonas, C<<kntonas@gmail.com>>. All rights reserved.
+Copyright (c) 2010, Kostas Ntonas, C<<kntonas at gmail.com>>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

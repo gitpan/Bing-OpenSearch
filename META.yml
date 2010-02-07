@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Bing-OpenSearch
-version:            0.0.1
+version:            0.0.2
 abstract:           Access the OpenSearch compliant RSS interface of the Bing API version 2.0.
 author:
     - Kostas Ntonas <kntonas@gmail.com>
@@ -12,6 +12,7 @@ build_requires:
     ExtUtils::MakeMaker:  0
 requires:
     Class::Std::Utils:  0
+    Encode:             0
     LWP::UserAgent:     0
     Scalar::Util:       0
     Test::Exception:    0

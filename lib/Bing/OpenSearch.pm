@@ -11,7 +11,7 @@ use XML::LibXML;
 
 use Bing::OpenSearch::Response;
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 our $agent;
 
@@ -26,7 +26,7 @@ sub Query {
     $searchTerms =~s#\s+#%20#g;  # replace white space characters with %20
 
     my $sourceType = $$params_ref{sourceType} || 'Web';
-    if (! ($sourceType=~m/web/i or $sourceType=~m/image/i)) {
+    if ($sourceType ne 'Web' and $sourceType ne 'Image') {
         croak "The supported search spaces are Web and Image. Please enter a valid sourceType parameter.";
     }
 
@@ -60,7 +60,7 @@ sub Query {
     my $response = $agent->get($url);
     unless ($response->is_success) { croak "Failed to fetch $url"; }
 
-    return Bing::OpenSearch::Response->new($response->content,$url);
+    return Bing::OpenSearch::Response->new($response->content, $url, $sourceType);
 }
 
 1;
@@ -72,29 +72,28 @@ Bing::OpenSearch - Access the OpenSearch compliant RSS interface of the Bing API
 
 =head1 VERSION
 
-Version 0.0.1
+Version 0.0.2
 
 =head1 SYNOPSIS
 
  use strict;
  use warnings;
 
- use Encode;
  use Bing::OpenSearch;
 
- # Query Bing Image search space for 'Apple iPad'
- my $response = Bing::OpenSearch->Query( 'Apple iPad', { sourceType => 'Image',
-                                                         offset => 0,
-                                                         count => 10,
-                                                         #market => 'en-us'
-                                                       }
+ # Query Bing Image search space for 'Greece'
+ my $response = Bing::OpenSearch->Query( 'Greece', { sourceType => 'Image',
+                                                     offset => 0,
+                                                     count => 10,
+                                                     market => 'en-us'
+                                                   }
                                        );
 
  print "Query URL: ", $response->queryURL,"\n";
  print "Number of Results: ", $response->totalResults,"\n";
 
  for my $item ($response->results) { # parse results and print data
-    print "title: ", encode_utf8($item->title),"\n";
+    print "title: ", $item->title,"\n";
     print "link : ", $item->link,"\n";
     print "guid : ", $item->guid,"\n";
     if ($item->description) {
@@ -104,22 +103,21 @@ Version 0.0.1
         print "pubDate: ", $item->pubDate,"\n";
     }
 
-    # ONLY for Image search space:
-    print "media-content-url     : ", $item->media_content->url,"\n";
-    print "media-content-height  : ", $item->media_content->height,"\n";
-    print "media-content-width   : ", $item->media_content->width,"\n";
-    print "media-content-fileSize: ", $item->media_content->fileSize,"\n";
-    print "media-content-type    : ", $item->media_content->type,"\n";
-    print "media-thumbnail-url   : ", $item->media_thumbnail->url,"\n";
-    print "media-thumbnail-height: ", $item->media_thumbnail->height,"\n";
-    print "media-thumbnail-width : ", $item->media_thumbnail->width,"\n";
+    if ($response->space eq 'Image') { # ONLY for Image search space:
+        print "media-content-url     : ", $item->media_content->url,"\n";
+        print "media-content-height  : ", $item->media_content->height,"\n";
+        print "media-content-width   : ", $item->media_content->width,"\n";
+        print "media-content-fileSize: ", $item->media_content->fileSize,"\n";
+        print "media-content-type    : ", $item->media_content->type,"\n";
+        print "media-thumbnail-url   : ", $item->media_thumbnail->url,"\n";
+        print "media-thumbnail-height: ", $item->media_thumbnail->height,"\n";
+        print "media-thumbnail-width : ", $item->media_thumbnail->width,"\n";
+    }
     print "\n";
  }
 
  # save the response feed to an RSS UTF-8 file
- open my $fh, '>:utf8', 'bing_response.rss';
- print $fh decode_utf8($response->content);
- close $fh;
+ $response->save('bing_response.rss');
 
 =head1 DESCRIPTION
 
@@ -156,7 +154,8 @@ you are currently processing.
 from Bing API version 2.0 is 50. However, if you want more results, you can submit multiple queries
 and utilize the offset parameter.
 
-=item * I<market> - language code, e.g. en-us.
+=item * I<market> - language code such as en-us (English), el-gr (Greek), es-es (Spanish), etc.
+If provided, attempts to restrict the results to those in the given language.
 
 =back
 
@@ -174,6 +173,8 @@ Note that all of these parameters are optional.
 
 =item * Class::Std::Utils
 
+=item * Encode
+
 =item * version
 
 =item * Test::More
@@ -182,41 +183,12 @@ Note that all of these parameters are optional.
 
 =back
 
-=head1 Bing API Version 2.0 Terms of Use
+=head1 Terms of Use
 
-B<What you must do>
-
-=over
-
-=item * Display all the results you request.
-
-=item * Display your results in the context of a user-facing application or website.
-
-=item * Display attribution to Bing in a manner compliant with our branding rules. Currently, you may
-  determine the specific manner in which you display attribution. A link to http://www.bing.com with
-  the query echo is a suggested example.
-
-=item * Restrict your usage to less than 7 queries per second (QPS) per IP address. You may be permitted to
-  exceed this limit under some conditions, but this must be approved through discussion with
-  api_tou@microsoft.com.
-
-=item * If you interleave data from any source other than the API with data from the API, clearly
-  differentiate the respective sources.
-
-=back
-
-B<What you cannot do>
-
-=over
-
-=item * Use API results for search engine optimization (SEO). In particular, using the API for rank checks is
-explicitly prohibited.
-
-=item * Change the order of the results the API returns from a SourceType other than the Web SourceType.
-
-=back
-
-For further information: L<http://www.bing.com/developers/tou.aspx>
+The results returned may not be used, reproduced or transmitted in any manner or for any purpose other
+than rendering Bing results within an RSS aggregator for your personal, non-commercial use. Any other use
+requires written permission from Microsoft Corporation. By using these results in any manner whatsoever, you
+agree to be bound by the foregoing restrictions.
 
 =head1 BUGS AND SUGGESTIONS
 
@@ -225,12 +197,12 @@ Any feedback is very welcome. Please contact me for any bugs, comments or sugges
 =head1 ACKNOWLEDGEMENTS
 
 Special thanks to Petr Pajas, Damian Conway, Gisle Aas, Andy Lester, Jeffrey Friedl, Michael G Schwern,
-Adrian Howard, John Peacock, David A P Mitchell and Graham Barr for their great modules and their huge
-contribution to the Perl community. And most of all to Larry Wall, the man who started it all.
+Dan Kogai, Adrian Howard, John Peacock, David A P Mitchell and Graham Barr for their great modules and
+their huge contribution to the Perl community. And most of all to Larry Wall, the man who started it all.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2010, Kostas Ntonas, C<<kntonas@gmail.com>>. All rights reserved.
+Copyright (c) 2010, Kostas Ntonas, C<<kntonas at gmail.com>>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

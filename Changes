@@ -2,3 +2,8 @@ Revision history for Bing::OpenSearch
 
 0.0.1  Feb 05, 2010
        - Initial release.
+
+0.0.2  Feb 07, 2010
+       - Added 'save' and 'space' methods to Bing::OpenSearch::Response.
+       - Minor changes to documentation and README.
+       - Modified Terms of Use: ONLY within an RSS aggregator for personal, non-commercial use.

@@ -12,6 +12,7 @@ WriteMakefile(
         'LWP::UserAgent'    => 0,
         'XML::LibXML'       => 0,
         'Class::Std::Utils' => 0,
+        'Encode'            => 0,
         'Test::More'        => 0,
         'Test::Exception'   => 0,
         'version'           => 0,

@@ -8,7 +8,7 @@ use Carp qw( croak );
 use XML::LibXML;
 use Class::Std::Utils;
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 # We use inside-out objects.
 # See Chapters 15 and 16 of "Perl Best Practices" (O'Reilly, 2005) for details.
@@ -95,7 +95,7 @@ Bing::OpenSearch::MediaContent - Class representing a media:content sub-element 
 
 =head1 VERSION
 
-Version 0.0.1
+Version 0.0.2
 
 =head1 PACKAGE USE
 
@@ -138,7 +138,7 @@ Returns the type attribute of a media:content sub-element.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2010, Kostas Ntonas, C<<kntonas@gmail.com>>. All rights reserved.
+Copyright (c) 2010, Kostas Ntonas, C<<kntonas at gmail.com>>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
